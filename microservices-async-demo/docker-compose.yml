@@ -1,0 +1,35 @@
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq-broker
+    ports:
+      - "5672:5672"   # Porta de comunicação AMQP
+      - "15672:15672" # Painel administrativo (login: guest/guest)
+    networks:
+      - micro-network
+
+  service-order:
+    build: ./service-order
+    container_name: service-order
+    ports:
+      - "8000:8000"
+    depends_on:
+      - rabbitmq
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+    networks:
+      - micro-network
+
+  service-payment:
+    build: ./service-payment
+    container_name: service-payment
+    depends_on:
+      - rabbitmq
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+    networks:
+      - micro-network
+
+networks:
+  micro-network:
+    driver: bridge
